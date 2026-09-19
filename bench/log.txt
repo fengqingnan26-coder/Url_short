@@ -1,0 +1,99 @@
+◎ hey -n 1000 -c 100 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Impla3l1bGxsQGdtYWlsLmNvbSIsInVzZXJfaWQiOjEsImV4cCI6MTc0OTUxMjA0MiwiaWF0IjoxNzQ5NDI1NjQyfQ.4Ck2c8GNub1wsvPNHRVD7LhUhskFq4OatP5-5f6mKCI" http://localhost:8080/epoll
+
+
+Summary:
+  Total:        0.7361 secs
+  Slowest:      0.2030 secs
+  Fastest:      0.0349 secs
+  Average:      0.0608 secs
+  Requests/sec: 1358.4676
+
+  Total data:   986562 bytes
+  Size/request: 986 bytes
+
+Response time histogram:
+  0.035 [1]     |
+  0.052 [695]   |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.068 [169]   |■■■■■■■■■■
+  0.085 [18]    |■
+  0.102 [5]     |
+  0.119 [7]     |
+  0.136 [6]     |
+  0.153 [14]    |■
+  0.169 [55]    |■■■
+  0.186 [28]    |■■
+  0.203 [2]     |
+
+
+Latency distribution:
+  10% in 0.0418 secs
+  25% in 0.0443 secs
+  50% in 0.0476 secs
+  75% in 0.0542 secs
+  90% in 0.1335 secs
+  95% in 0.1646 secs
+  99% in 0.1781 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:   0.0058 secs, 0.0349 secs, 0.2030 secs
+  DNS-lookup:   0.0009 secs, 0.0000 secs, 0.0194 secs
+  req write:    0.0000 secs, 0.0000 secs, 0.0007 secs
+  resp wait:    0.0221 secs, 0.0127 secs, 0.0993 secs
+  resp read:    0.0003 secs, 0.0000 secs, 0.0067 secs
+
+Status code distribution:
+  [200] 1000 responses
+
+  ---
+
+
+◎ hey -n 1000 -c 100 -m POST -H "Authorization: Bearer $TOKEN" \        ⌂ 07:53
+  -H "Content-Type: application/json" \
+  -d '{"original_url": "https://zhuanlan.zhihu.com/p/367591714", "custom_code": "abc123", "duration": 80, "user_id": 1}' \
+  http://localhost:8080/api/url
+
+
+Summary:
+  Total:        4.0490 secs
+  Slowest:      2.7637 secs
+  Fastest:      0.0191 secs
+  Average:      0.3361 secs
+  Requests/sec: 246.9763
+
+  Total data:   35864 bytes
+  Size/request: 35 bytes
+
+Response time histogram:
+  0.019 [1]     |
+  0.294 [582]   |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.568 [243]   |■■■■■■■■■■■■■■■■■
+  0.842 [93]    |■■■■■■
+  1.117 [50]    |■■■
+  1.391 [12]    |■
+  1.666 [12]    |■
+  1.940 [3]     |
+  2.215 [2]     |
+  2.489 [1]     |
+  2.764 [1]     |
+
+
+Latency distribution:
+  10% in 0.0488 secs
+  25% in 0.1042 secs
+  50% in 0.2416 secs
+  75% in 0.4442 secs
+  90% in 0.7677 secs
+  95% in 0.9448 secs
+  99% in 1.5852 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:   0.0020 secs, 0.0191 secs, 2.7637 secs
+  DNS-lookup:   0.0004 secs, 0.0000 secs, 0.0237 secs
+  req write:    0.0001 secs, 0.0000 secs, 0.0221 secs
+  resp wait:    0.3338 secs, 0.0190 secs, 2.7636 secs
+  resp read:    0.0000 secs, 0.0000 secs, 0.0007 secs
+
+Status code distribution:
+  [201] 1 responses
+  [400] 995 responses
+  [500] 4 responses
