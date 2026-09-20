@@ -47,7 +47,7 @@ func (h *URLHandler) CreateURL(c *gin.Context) {
 	var req dto.CreateURLRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": "请求参数格式错误",
 		})
 		return
 	}
@@ -56,7 +56,7 @@ func (h *URLHandler) CreateURL(c *gin.Context) {
 	err := validate.Struct(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": "请求参数验证失败：" + err.Error(),
 		})
 		return
 	}
@@ -67,7 +67,7 @@ func (h *URLHandler) CreateURL(c *gin.Context) {
 		if errors.Is(err, service.ErrShortCodeTaken) {
 			status = http.StatusBadRequest
 		}
-		c.JSON(status, gin.H{"error": err.Error()})
+		c.JSON(status, gin.H{"message": err.Error()})
 		return
 	}
 	// 4. 返回响应
@@ -83,13 +83,13 @@ func (h *URLHandler) RedirectURL(c *gin.Context) {
 	originalURL, err := h.urlService.GetURL(c.Request.Context(), shortCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"message": "服务器内部错误",
 		})
 		return
 	}
 	if originalURL == "" {
 		c.JSON(404, gin.H{
-			"error": "no such short code",
+			"message": "该短链接不存在或已过期",
 		})
 		return
 	}
@@ -108,13 +108,13 @@ func (h *URLHandler) RedirectURL(c *gin.Context) {
 func (h *URLHandler) GetURLs(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "无法获取用户ID"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "无法获取用户身份"})
 		return
 	}
 
 	var req dto.GetURLsRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "查询参数格式错误"})
 		return
 	}
 
@@ -130,7 +130,7 @@ func (h *URLHandler) GetURLs(c *gin.Context) {
 
 	resp, err := h.urlService.GetURLs(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "服务器内部错误"})
 		return
 	}
 
@@ -141,7 +141,7 @@ func (h *URLHandler) DeleteURL(c *gin.Context) {
 	shortCode := c.Param("code")
 
 	if err := h.urlService.DeleteURL(c.Request.Context(), shortCode); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "服务器内部错误"})
 		return
 	}
 
@@ -151,14 +151,14 @@ func (h *URLHandler) DeleteURL(c *gin.Context) {
 func (h *URLHandler) UpdateURLDuration(c *gin.Context) {
 	var req dto.UpdateURLDurationReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "请求参数格式错误"})
 		return
 	}
 
 	req.Code = c.Param("code")
 
 	if err := h.urlService.UpdateURLDuration(c.Request.Context(), req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "服务器内部错误"})
 		return
 	}
 
