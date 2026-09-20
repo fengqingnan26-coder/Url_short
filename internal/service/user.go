@@ -150,7 +150,8 @@ func (s *UserService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 		return nil, fmt.Errorf("failed to get user by email: %v", err)
 	}
 
-	if !s.passwordHasher.ComparePassword(user.PasswordHash, req.Password) {
+	// 用户不存在与密码错误统一返回，避免泄露邮箱是否已注册，同时防止 nil 指针 panic
+	if user == nil || !s.passwordHasher.ComparePassword(user.PasswordHash, req.Password) {
 		return nil, ErrUserNameOrPasswordFailed
 	}
 

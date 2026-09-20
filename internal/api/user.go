@@ -34,19 +34,21 @@ func (h *UserHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": "请求参数无效，请检查邮箱和密码格式",
 		})
+		return
 	}
 
 	resp, err := h.userService.Login(c.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNameOrPasswordFailed) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			// TODO check
+			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"message": "服务器内部错误，请稍后重试",
 		})
+		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
@@ -55,25 +57,36 @@ func (h *UserHandler) Register(c *gin.Context) {
 	var req dto.RegisterReqeust
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": "请求参数无效，请检查邮箱、密码和验证码",
 		})
+		return
 	}
 
 	if err := h.userService.IsEmailAvailable(c.Request.Context(), req.Email); err != nil {
-		if errors.Is(err, service.ErrUserNameOrPasswordFailed) {
+		if errors.Is(err, service.ErrEmailAleadyExist) {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
+				"message": "该邮箱已注册",
 			})
+			return
 		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "服务器内部错误，请稍后重试",
+		})
+		return
 	}
 
 	resp, err := h.userService.Register(c.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, service.ErrEmailCodeNotEqual) {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
+				"message": "邮箱验证码错误",
 			})
+			return
 		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "服务器内部错误，请稍后重试",
+		})
+		return
 	}
 	c.JSON(http.StatusCreated, resp)
 }
@@ -82,29 +95,36 @@ func (h *UserHandler) ForgetPassword(c *gin.Context) {
 	var req dto.ForgetPasswordReqeust
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": "请求参数无效，请检查邮箱、密码和验证码",
 		})
+		return
 	}
 
-	err := h.userService.IsEmailAvailable(c.Request.Context(), req.Email)
-	// TODO check
-	if err == nil {
+	// 邮箱必须已存在才能重置密码
+	if err := h.userService.IsEmailAvailable(c.Request.Context(), req.Email); err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "email not exits",
+			"message": "该邮箱未注册",
 		})
+		return
+	} else if !errors.Is(err, service.ErrEmailAleadyExist) {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "服务器内部错误，请稍后重试",
+		})
+		return
 	}
 
 	resp, err := h.userService.ResetPassword(c.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, service.ErrEmailCodeNotEqual) {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
+				"message": "邮箱验证码错误",
 			})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"message": "服务器内部错误，请稍后重试",
 		})
+		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
@@ -115,8 +135,9 @@ func (h *UserHandler) SendEmailCode(c *gin.Context) {
 
 	if err := h.userService.SendEmailCode(c.Request.Context(), email); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"message": "验证码发送失败，请稍后重试",
 		})
+		return
 	}
 	c.Status(http.StatusNoContent)
 }

@@ -43,10 +43,12 @@ export function LoginForm() {
         body: JSON.stringify(data),
       });
 
-      const payload = await response.json();
+      // 响应体可能为空，安全解析
+      const text = await response.text();
+      const payload = text ? JSON.parse(text) : {};
 
       if (!response.ok) {
-        toast.error(payload?.message);
+        toast.error(payload?.message ?? "登录失败，请检查邮箱和密码");
         return;
       }
 
@@ -55,7 +57,7 @@ export function LoginForm() {
       router.push("/");
       toast.success("登录成功");
     } catch {
-      toast.error("服务请出错请重试");
+      toast.error("服务出错，请稍后重试");
     }
   }
 

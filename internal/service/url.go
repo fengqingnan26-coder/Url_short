@@ -37,7 +37,7 @@ type URLCacher interface {
 }
 
 type ShortCodeGenerator interface {
-	GenerateShortCode() string
+	GenerateShortCode() (string, error)
 }
 
 type URLService struct {
@@ -230,7 +230,10 @@ func (s *URLService) getShortCode(ctx context.Context, n int) (string, error) {
 	if n > 5 {
 		return "", errors.New("retry too many times")
 	}
-	code := s.shortCodeGenerator.GenerateShortCode()
+	code, err := s.shortCodeGenerator.GenerateShortCode()
+	if err != nil {
+		return "", err
+	}
 	status, err := s.CheckShortCode(ctx, code)
 	if err != nil {
 		return "", err
@@ -310,3 +313,4 @@ func (s *URLService) SyncViewsToDB(ctx context.Context) error {
 
 var _ URLCacher = (*cache.RedisCache)(nil)
 var _ ShortCodeGenerator = (*shortcode.RandomShortCodeGeneratorImpl)(nil)
+var _ ShortCodeGenerator = (*shortcode.SnowflakeShortCodeGenerator)(nil)

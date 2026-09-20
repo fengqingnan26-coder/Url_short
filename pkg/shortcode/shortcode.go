@@ -15,13 +15,13 @@ func NewShortCodeGeneratorImpl(length int) *RandomShortCodeGeneratorImpl {
 const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 // 使用随机数生成的短码
-func (s *RandomShortCodeGeneratorImpl) GenerateShortCode() string {
+func (s *RandomShortCodeGeneratorImpl) GenerateShortCode() (string, error) {
 	length := len(chars)
 	result := make([]byte, s.length)
 	for i := 0; i < s.length; i++ {
 		result[i] = chars[rand.Intn(length)]
 	}
-	return string(result)
+	return string(result), nil
 }
 
 // 解决重复长地址转换攻击

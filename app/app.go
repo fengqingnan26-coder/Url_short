@@ -26,6 +26,7 @@ import (
 	"github.com/jekyulll/url_shortener/pkg/jwt"
 	"github.com/jekyulll/url_shortener/pkg/randnum"
 	"github.com/jekyulll/url_shortener/pkg/shortcode"
+	"github.com/jekyulll/url_shortener/pkg/snowflake"
 	"gorm.io/gorm"
 )
 
@@ -81,7 +82,16 @@ func (a *Application) Init(configPath string) error {
 
 	randNum := randnum.NewRandNum(cfg.RandNum)
 
-	generator := shortcode.NewShortCodeGeneratorImpl(cfg.ShortCode.Length)
+	// 雪花算法短码生成器：雪花 ID -> Base62
+	epoch, err := time.Parse(time.RFC3339, cfg.Snowflake.Epoch)
+	if err != nil {
+		return fmt.Errorf("invalid snowflake epoch %q: %w", cfg.Snowflake.Epoch, err)
+	}
+	sfNode, err := snowflake.NewNode(cfg.Snowflake.NodeID, epoch, cfg.Snowflake.NodeBits, cfg.Snowflake.StepBits)
+	if err != nil {
+		return fmt.Errorf("init snowflake node: %w", err)
+	}
+	generator := shortcode.NewSnowflakeShortCodeGenerator(sfNode, cfg.ShortCode.Length)
 
 	// cuntomValidator := validator.NewCustomValidator()
 

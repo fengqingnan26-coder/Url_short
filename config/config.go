@@ -20,6 +20,7 @@ type Config struct {
 	Email     EmailConfig     `mapstructure:"email"`
 	JWT       JWTConfig       `mapstructure:"jwt"`
 	RandNum   RandNumConfig   `mapstructure:"rand_num"`
+	Snowflake SnowflakeConfig `mapstructure:"snowflake"`
 }
 
 // var Cfg *Config
@@ -119,6 +120,18 @@ type LogConfig struct {
 
 type RandNumConfig struct {
 	Length int `mapstructure:"length"`
+}
+
+// SnowflakeConfig 雪花算法配置
+type SnowflakeConfig struct {
+	// NodeID 节点编号，多实例部署时每个实例必须唯一（0 ~ 2^NodeBits-1）
+	NodeID int64 `mapstructure:"node_id"`
+	// Epoch 自定义纪元（RFC3339 格式），建议设为上线时间附近，使生成的短码更短
+	Epoch string `mapstructure:"epoch"`
+	// NodeBits 节点 ID 位数，默认 10（最多 1024 个节点）
+	NodeBits uint8 `mapstructure:"node_bits"`
+	// StepBits 每毫秒序列号位数，默认 12（每节点每毫秒 4096 个）
+	StepBits uint8 `mapstructure:"step_bits"`
 }
 
 type JWTConfig struct {
